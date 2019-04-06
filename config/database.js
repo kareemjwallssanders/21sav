@@ -1,6 +1,6 @@
 // config/database.js
-module.exports = {'url' :'mongodb+srv://demo:demo@21savageauth-gvo5j.mongodb.net/test?retryWrites=true',
-'dbName':'21savageauth'
+module.exports = {'url' :'mongodb+srv://demo:demo@sneakerapi-pjwh6.mongodb.net/test?retryWrites=true',
+'dbName':'sneakerapi'
 };
 
 

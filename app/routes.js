@@ -1,109 +1,129 @@
-module.exports = function(app, passport, db) {
-
+module.exports = function (app, passport, db) {
   // normal routes ===============================================================
-  
-      // show the home page (will also have our login links)
-      app.get('/', function(req, res) {
-          res.render('index.ejs');
-      });
-  
-      // PROFILE SECTION =========================
-      app.get('/profile', isLoggedIn, function(req, res) {
-          db.collection('messages').find().toArray((err, result) => {
-            if (err) return console.log(err)
-            res.render('profile.ejs', {
-              user : req.user,
-              messages: result
-            })
-          })
-      });
-  
-      // LOGOUT ==============================
-      app.get('/logout', function(req, res) {
-          req.logout();
-          res.redirect('/');
-      });
-  
-  // message board routes ===============================================================
-  
-      app.post('/messages', (req, res) => {
-        db.collection('messages').save({name: req.body.name, msg: req.body.msg, thumbUp: 0, thumbDown:0}, (err, result) => {
-          if (err) return console.log(err)
-          console.log('saved to database')
-          res.redirect('/profile')
-        })
-      })
-  
-      app.put('/messages', (req, res) => {
-        db.collection('messages')
-        .findOneAndUpdate({name: req.body.name, msg: req.body.msg}, {
-          $set: {
-            thumbUp:req.body.thumbUp + 1
-          }
-        }, {
-          sort: {_id: -1},
-          upsert: true
-        }, (err, result) => {
-          if (err) return res.send(err)
-          res.send(result)
-        })
-      })
-  
-      app.put('/messages', (req, res) => {
-        console.log("thumbDown");
-        db.collection('messages')
-        .findOneAndUpdate({name: req.body.name, msg: req.body.msg}, {
-          $set: {
-            thumbDown:req.body.thumbDown - 1
-          }
-        }, {
-          sort: {_id: -1},
-          //sort through a document that matches and if it doesnt it will creates a doc
-          upsert: true
-        }, (err, result) => {
-          if (err) return res.send(err)
-          res.send(result)
-        })
-      })
-  
-      app.delete('/messages', (req, res) => {
-        db.collection('messages').findOneAndDelete({name: req.body.name, msg: req.body.msg}, (err, result) => {
-          if (err) return res.send(500, err)
-          res.send('Message deleted!')
-        })
-      })
-  
+//login, about, search, sneaker collection,
+
+
+  // Homepage ===============================
+  // show the home page (will also have our homepage, login, sign up, about, search, sneaker collection, 
+  //Sneaker Preference, Users Account, User Stage, User View links )
+  app.get('/', function (req, res) {
+    res.render('index.ejs')
+  })
   // =============================================================================
+
   // AUTHENTICATE (FIRST LOGIN) ==================================================
   // =============================================================================
+
+  // locally --------------------------------
+
+  // LOGIN ===============================
+
+  // show the login form
+  app.get('/login', function (req, res) {
+    res.render('login.ejs', { message: req.flash('loginMessage') })
+  })
+
+  // process the login form
+  // use a stratagey login authentican
+  app.post('/login', passport.authenticate('local-login', {
+      successRedirect: '/profile', // redirect to the secure profile section
+      failureRedirect: '/login', // redirect back to the signup page if there is an error
+      failureFlash: true // allow flash messages
+    })
+  )
+  //=========================================
+
+  // LOGOUT ==============================
+  app.get('/logout', function (req, res) {
+    req.logout()
+    res.redirect('/')
+  })
+
+  //=========================================
+
   
-      // locally --------------------------------
-          // LOGIN ===============================
-          // show the login form
-          app.get('/login', function(req, res) {
-              res.render('login.ejs', { message: req.flash('loginMessage') });
-          });
+
+  // ABOUT ===============================
+  app.get('/about', function (req, res) {
+    res.render('index.ejs')
+  })
+  //= ========================================
+
+  // SEARCH ==================================
+
+  app.get('/search', function (req, res) {
+    res.render('index.ejs')
+  })
+  //===========================================
+
+  // SNEAKER COLLECTION ======================
+
+  app.get('/sneaker collection', function (req, res) {
+    res.render('index.ejs')
+  })
+  //=========================================
+
+  // PROFILE SECTION =========================
+  app.get('/profile', isLoggedIn, function (req, res) {
+    db.collection('messages')
+      .find()
+      .toArray((err, result) => {
+        if (err) return console.log(err)
+        res.render('profile.ejs', {
+          user: req.user,
+          messages: result
+        })
+      })
+  })
+
+  //Renders entire sneaker collection to user Stage
+  app.post('/profile', (req, res) =>{
+
+  });
+
+
+//Renders uploaded image and and descriptiond of site 
+  app.post('/profile', (req, res) =>{
+
+  });
+
+  //allows user to delete images and or desription of sneaker coll.
+  app.delete('/profile',(req,res) =>{
+
+  });
+  //=========================================
+
+
+  // PROFILE SECTION =========================
+  app.get('/profile', isLoggedIn, function (req, res) {
+    db.collection('messages')
+      .find()
+      .toArray((err, result) => {
+        if (err) return console.log(err)
+        res.render('profile.ejs', {
+          user: req.user,
+          messages: result
+        })
+      })
+  })
+  //=========================================
+
+
+  // Userstage ===============================================================
+
+  //Allows users to to take their account off User stage
+
+  app.delete('/messages', (req, res) => {
+    db.collection('messages').findOneAndDelete(
+      { name: req.body.name, msg: req.body.msg },
+      (err, result) => {
+        if (err) return res.send(500, err)
+        res.send('Message deleted!')
+      }
+    )
+  })
+
   
-          // process the login form
-          //use a stratagey login authentican
-          app.post('/login', passport.authenticate('local-login', {
-              successRedirect : '/profile', // redirect to the secure profile section
-              failureRedirect : '/login', // redirect back to the signup page if there is an error
-              failureFlash : true // allow flash messages
-          }));
-  
-          // SIGNUP =================================
-          // show the signup form
-          app.get('/signup', function(req, res) {
-              res.render('signup.ejs', { message: req.flash('signupMessage') });
-          });
-  
-          // process the signup form
-          app.post('/signup', passport.authenticate('local-signup', {
-              successRedirect : '/profile', // redirect to the secure profile section
-              failureRedirect : '/signup', // redirect back to the signup page if there is an error
-              failureFlash : true // allow flash messages
-          }));
   
   // =============================================================================
   // UNLINK ACCOUNTS =============================================================
@@ -111,24 +131,21 @@ module.exports = function(app, passport, db) {
   // used to unlink accounts. for social accounts, just remove the token
   // for local account, remove email and password
   // user account will stay active in case they want to reconnect in the future
-  
-      // local -----------------------------------
-      app.get('/unlink/local', isLoggedIn, function(req, res) {
-          var user            = req.user;
-          user.local.email    = undefined;
-          user.local.password = undefined;
-          user.save(function(err) {
-              res.redirect('/profile');
-          });
-      });
-  
-  };
-  
-  // route middleware to ensure user is logged in
-  function isLoggedIn(req, res, next) {
-      if (req.isAuthenticated())
-          return next();
-  
-      res.redirect('/');
-  }
-  
+
+  // local -----------------------------------
+  app.get('/unlink/local', isLoggedIn, function (req, res) {
+    var user = req.user
+    user.local.email = undefined
+    user.local.password = undefined
+    user.save(function (err) {
+      res.redirect('/profile')
+    })
+  })
+}
+
+// route middleware to ensure user is logged in
+function isLoggedIn (req, res, next) {
+  if (req.isAuthenticated()) return next()
+
+  res.redirect('/')
+}
